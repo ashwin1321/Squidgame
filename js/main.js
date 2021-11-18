@@ -15,6 +15,10 @@ scene.add(light);
 
 const start_position = 3;
 const end_position = -start_position;
+const text = document.querySelector(".text")
+const TIMIT_LIMIT = 10
+let game_stat = "loading"
+let isLookingBackward =  true
 
 function createCube(size, positionX, rotY = 0, color = 0xfbc851) {
     // creating the virtual world
@@ -31,7 +35,10 @@ camera.position.z = 5;
 
 const loader = new THREE.GLTFLoader();
 
-
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+    
+}
 
 class Doll {
     constructor() {
@@ -46,11 +53,24 @@ class Doll {
     lookBackward() {
         // this.doll.rotation.y  =-3.1;
         gsap.to(this.doll.rotation, { y: -3.1, duration: .45 })
+        setTimeout(() => 
+            isLookingBackward = true, 150);
     }
 
     lookForward() {
         // this.doll.rotation.y = 0;  
         gsap.to(this.doll.rotation, { y: 0, duration: .45 })
+        setTimeout(() => 
+            isLookingBackward = false, 450)
+        
+    }
+
+    async start(){
+        this.lookBackward()
+        await delay((Math.random() * 1000) + 1000)
+        this.lookForward()
+        await delay((Math.random() * 750) + 750)
+        this.start()
     }
 }
 
@@ -72,26 +92,93 @@ createTrack()
 class Player {
     constructor() {
         const geometry = new THREE.SphereGeometry(.2, 32, 16);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.z = 1;
+        sphere.position.x = start_position;
+
         scene.add(sphere);
+        this.player = sphere;
+        this.playerInfo = {
+            positionX: start_position,
+            velocity: 0
+        }
     }
+    run(){
+        this.playerInfo.velocity = .03
+    }
+
+    stop(){
+        // this.playerInfo.velocity = 0
+        gsap.to(this.playerInfo, {velocity: 0, duration: .1})
+    }
+
+    check(){
+        if(this.playerInfo.velocity > 0 && !isLookingBackward ){
+            // alert("you lose!")
+            text.innerText = "You Lose!!"
+            game_stat = "over"
+        }
+        if(this.playerInfo.positionX < end_position +.4) {
+            // alert("you win!")
+            text.innerText = "You Won!!"
+            game_stat = "over"
+        }
+
+
+    }
+
+    update(){
+        this.check()
+        this.playerInfo.positionX -= this.playerInfo.velocity
+        this.player.position.x = this.playerInfo.positionX
+    }
+
+
 }
+
+
+
 
 const player = new Player()
 
-let doll = new Doll;
-setTimeout(() => {
-    doll.lookBackward()
-}, 1000);
+let doll = new Doll();
 
+async function init() {
+    await delay(500)
+    text.innerText = " Starting in 3"
+    await delay(500)
+    text.innerText = " Starting in 2"
+    await delay(500)
+    text.innerText = " Starting in 1"
+    await delay(500)
+    text.innerText = " Go!!!!!"
+    startGame()
+}
+
+function startGame() {
+    game_stat = "started"
+    
+    let progressBar = createCube ({w: 5.2, h: .1,d: 1}, 0)
+    progressBar.position.y = 3.35
+    gsap.to(progressBar.scale, {x: 0, duration: TIMIT_LIMIT, ease: "none"})
+    doll.start()
+    // setTimeout(() => {
+    //     if (game_stat != "over")
+    //     text.innerText = "You ran out of time!"
+    // }, TIMIT_LIMIT *100);
+}
+
+init()
 
 function animate() {                  // continuously run bhairakhxa so manually render garna code garnu parena 
 
     renderer.render(scene, camera);
+    if(game_stat == 'over') return
 
     // cube.rotation.z += 0.0001;               // cube lai kun axis ma kati speed ma rotate garaune
     requestAnimationFrame(animate);
+    player.update()
 }
 animate();
 
@@ -109,4 +196,14 @@ function onWindowResize() {
 }
 
 
-
+window.addEventListener('keydown', (e) => {
+    if(game_stat !== "started") return
+    if(e.key == "ArrowUp" ){
+        player.run()
+    }
+})
+window.addEventListener('keyup', (e) => {
+    if(e.key == "ArrowUp" ){
+        player.stop()
+    }
+})
