@@ -157,11 +157,11 @@ async function init() {
 }
 
 function startGame() {
-    doll.start()
     game_stat = "started"
     
     let progressBar = createCube ({w: 5.2, h: .1,d: 1}, 0)
     progressBar.position.y = 3.35
+    doll.start()
     gsap.to(progressBar.scale, {x: 0, duration: TIMIT_LIMIT, ease: "none"})
     setTimeout(() => {
         if (game_stat != "over")
@@ -207,3 +207,4 @@ window.addEventListener('keyup', (e) => {
         player.stop()
     }
 })
+
