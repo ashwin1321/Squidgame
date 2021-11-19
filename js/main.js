@@ -157,16 +157,16 @@ async function init() {
 }
 
 function startGame() {
+    doll.start()
     game_stat = "started"
     
     let progressBar = createCube ({w: 5.2, h: .1,d: 1}, 0)
     progressBar.position.y = 3.35
     gsap.to(progressBar.scale, {x: 0, duration: TIMIT_LIMIT, ease: "none"})
-    doll.start()
-    // setTimeout(() => {
-    //     if (game_stat != "over")
-    //     text.innerText = "You ran out of time!"
-    // }, TIMIT_LIMIT *100);
+    setTimeout(() => {
+        if (game_stat != "over")
+        text.innerText = "You ran out of time!"
+    }, TIMIT_LIMIT *1000);
 }
 
 init()
