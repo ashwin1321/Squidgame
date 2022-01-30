@@ -64,7 +64,7 @@ class Doll {
             isLookingBackward = false, 450)
         
     }
-
+    
     async start(){
         this.lookBackward()
         await delay((Math.random() * 1000) + 1000)
@@ -167,6 +167,7 @@ function startGame() {
         if (game_stat != "over")
         text.innerText = "You ran out of time!"
     }, TIMIT_LIMIT *1000);
+   
 }
 
 init()
